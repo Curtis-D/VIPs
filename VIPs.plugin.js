@@ -1,28 +1,16 @@
 //META{"name":"VIPs"}*//
 var VIPs = function() {
     "use strict";
-    var getOwnerInstance, getInternalInstance, ReactDOM, React, WebpackModules, UserStore, StatusStore, FriendsStore, MemberStore, GuildsStore, Friends, originalFriendsRender, originalFriendsUpdate, userModal;
-
-    getOwnerInstance = function(n){
-        return getInternalInstance(n).return.return.stateNode;
-    }
+    var userModal;
 
     return class VIPs {
         getName() { return "VIPs"; }
-        getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included)."; }
+        getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
         getVersion() { return "1.0.0"; }
         getAuthor() { return "Green"; }
+        getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
 
-        load() {
-            getInternalInstance = BDV2.reactDom.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactDOMComponentTree.getInstanceFromNode;
-            ({
-                reactDom: ReactDOM,
-                react: React,
-                WebpackModules
-            } = BDV2);
-        }
-
-        unload() {}
+        load() {}
 
         start() {
             var libraryScript = document.getElementById('zeresLibraryScript');
@@ -39,87 +27,79 @@ var VIPs = function() {
 
         initialize() {
             this.initialized = true;
-            UserStore = WebpackModules.findByUniqueProperties(["getCurrentUser"]);
-            StatusStore = BDV2.WebpackModules.findByUniqueProperties(["getStatus", "getStatuses"])
-            FriendsStore = WebpackModules.findByUniqueProperties(["isFriend"]);
-            MemberStore = WebpackModules.findByUniqueProperties(["getMembers"]);
-            GuildsStore = WebpackModules.findByUniqueProperties(["getGuild"]);
-            PluginUtilities.checkForUpdate(this.getName(), this.getVersion());
-            Friends = WebpackModules.find(module => module.displayName === "Friends" && module.prototype.render);
-            originalFriendsRender = Friends.prototype.render;
-            originalFriendsUpdate = Friends.prototype.componentDidUpdate;
+            PluginUtilities.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
+            const Friends = InternalUtilities.WebpackModules.findByDisplayName("Friends");
 
-            Friends.prototype.render = function() {
+            Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
                 let user;
                 let data = PluginUtilities.loadData("VIPs", "VIPs", "");
                 if(data.ids){
                     if(data.ids.length > 0){
                         data.ids.forEach((id) => {
-                            if((this.state.rows._rows[0]) && (user = UserStore.getUser(id))){
+                            if((thisObject.state.rows._rows[0]) && (user = DiscordModules.UserStore.getUser(id))){
                                 let mutualGuilds = [];
-                                Object.values(GuildsStore.getGuilds()).forEach((guild) => {
-                                    if(MemberStore.isMember(guild.id, id)){ mutualGuilds.push(guild); }
+                                Object.values(DiscordModules.GuildStore.getGuilds()).forEach((guild) => {
+                                    if(DiscordModules.GuildMemberStore.isMember(guild.id, id)){ mutualGuilds.push(guild); }
                                 })
-                                let objectRow = new (this.state.rows._rows[0].constructor)({
-                                    activity: StatusStore.getActivity(id),
+                                let objectRow = new (thisObject.state.rows._rows[0].constructor)({
+                                    activity: DiscordModules.UserStatusStore.getActivity(id),
                                     key: id,
                                     mutualGuilds: mutualGuilds,
                                     mutualGuildsLength: mutualGuilds.length,
-                                    status: StatusStore.getStatus(id),
+                                    status: DiscordModules.UserStatusStore.getStatus(id),
                                     type: 99,
                                     user: user,
                                     usernameLower: user.usernameLowerCase
                                 });
-                                let found = this.state.rows._rows.some((row) => row.key == objectRow.key && row.type == objectRow.type);
-                                if(!found){ this.state.rows._rows.push(objectRow); }
-                                this.state.rows._rows.forEach((row) => {
+                                let found = thisObject.state.rows._rows.some((row) => row.key == objectRow.key && row.type == objectRow.type);
+                                if(!found){ thisObject.state.rows._rows.push(objectRow); }
+                                thisObject.state.rows._rows.forEach((row) => {
                                     if(!(data.ids.some((id) => (row.type == 99 && row.key == id)) || (row.type != 99))){
-                                        let index = this.state.rows._rows.indexOf(row);
-                                        if (index > -1) { this.state.rows._rows.splice(index, 1); }
+                                        let index = thisObject.state.rows._rows.indexOf(row);
+                                        if (index > -1) { thisObject.state.rows._rows.splice(index, 1); }
                                     }
                                 });
                             }
                         });
                     } else {
-                        this.state.rows._rows.forEach((row) => {
+                        thisObject.state.rows._rows.forEach((row) => {
                             if(row.type == 99){
-                                let index = this.state.rows._rows.indexOf(row);
-                                if (index > -1) { this.state.rows._rows.splice(index, 1); }
+                                let index = thisObject.state.rows._rows.indexOf(row);
+                                if (index > -1) { thisObject.state.rows._rows.splice(index, 1); }
                             }
                         });
                     }
                 }
                 
-                let returnOriginal = originalFriendsRender.call(this);
-                let sections = returnOriginal.props.children[0].props.children.props.children;
+                let sections = returnValue.props.children[0].props.children.props.children;
                 sections.push(sections[sections.length-2]);
-                sections.push(React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
+                sections.push(DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
                 sections[sections.length-1].key = "VIP";
    
                 let VIPs = [];
-                this.state.rows._rows.forEach((row) => {
+                thisObject.state.rows._rows.forEach((row) => {
                     if(row.type == 99){ VIPs.push(row); }
                 });
 
                 try{
-                    if(this.state.section == "VIP"){
-                        let Row = returnOriginal.props.children[1].props.children[1].props.children.props.children[0].type;
+                    if(thisObject.state.section == "VIP"){
+                        let Row = returnValue.props.children[1].props.children[1].props.children.props.children[0].type;
                         if(!Row) { return };
-                        returnOriginal.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
-                            return React.createElement(Row, Object.assign({}, vip));
+                        returnValue.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
+                            return DiscordModules.React.createElement(Row, Object.assign({}, vip));
                         });
                     }
                 } catch(e){
                     console.error(e);
                 } finally{
-                    return returnOriginal;
+                    return returnValue;
                 }
-            };
+            });
 
-            Friends.prototype.componentDidUpdate = function() {
+            Patcher.instead(this.getName(), Friends.prototype, "componentDidUpdate", function(thisObject) {
                 let vipRowNumber = 0;
-                if(this.state.section == "VIP"){
-                    this.state.rows._rows.forEach((row) => {
+                if(thisObject.state.section == "VIP"){
+                    thisObject.state.rows._rows.forEach((row) => {
                         if(row.type == 99){
                             let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber];
                             let wrapper = document.createElement('div');
@@ -160,7 +140,7 @@ var VIPs = function() {
                         }
                     })
                 }
-            }
+            });
 
             if(document.querySelector(".friends-table")){ getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
 
@@ -207,10 +187,7 @@ var VIPs = function() {
         }
 
         stop() {
-            originalFriendsRender && (Friends.prototype.render = originalFriendsRender);
-            originalFriendsUpdate && (Friends.prototype.componentDidUpdate = originalFriendsUpdate);
-            originalFriendsRender = null;
-            originalFriendsUpdate = null;
+            Patcher.unpatchAll(this.getName());
         }
 
     }
