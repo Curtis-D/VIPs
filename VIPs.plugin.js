@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.0.1"; }
+        getVersion() { return "1.0.2"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
 
@@ -83,11 +83,17 @@ var VIPs = function() {
 
                 try{
                     if(thisObject.state.section == "VIP"){
-                        let Row = returnValue.props.children[1].props.children[1].props.children.props.children[0].type;
+                        let Row = returnValue.props.children[1].props.children[1].props.children.props.children[0].type || returnValue.props.children[1].props.children[1].props.children[0].type;
                         if(!Row) { return };
-                        returnValue.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
-                            return DiscordModules.React.createElement(Row, Object.assign({}, vip));
-                        });
+                        if(returnValue.props.children[1].props.children[1].props.children.props.children){
+                            returnValue.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
+                                return DiscordModules.React.createElement(Row, Object.assign({}, vip));
+                            });
+                        } else {
+                            returnValue.props.children[1].props.children[1].props.children = VIPs.map(vip=>{
+                                return DiscordModules.React.createElement(Row, Object.assign({}, vip));
+                            });
+                        }
                     }
                 } catch(e){
                     console.error(e);
