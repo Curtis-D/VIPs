@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.0.2"; }
+        getVersion() { return "1.0.3"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
 
@@ -83,9 +83,13 @@ var VIPs = function() {
 
                 try{
                     if(thisObject.state.section == "VIP"){
-                        let Row = returnValue.props.children[1].props.children[1].props.children.props.children[0].type || returnValue.props.children[1].props.children[1].props.children[0].type;
+                        if(returnValue.props.children[1].props.children[1].props.children.props){
+                            var Row = returnValue.props.children[1].props.children[1].props.children.props.children[0].type
+                        } else{
+                            var Row = returnValue.props.children[1].props.children[1].props.children[0].type;
+                        }
                         if(!Row) { return };
-                        if(returnValue.props.children[1].props.children[1].props.children.props.children){
+                        if(returnValue.props.children[1].props.children[1].props.children.props){
                             returnValue.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
                                 return DiscordModules.React.createElement(Row, Object.assign({}, vip));
                             });
@@ -148,7 +152,7 @@ var VIPs = function() {
                 }
             });
 
-            if(document.querySelector(".friends-table")){ getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
+            if(document.querySelector(".friends-table")){ ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
 
             PluginUtilities.showToast(this.getName() + " " + this.getVersion() + " has started.");
         }
@@ -159,7 +163,7 @@ var VIPs = function() {
                 let actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
                     let data = PluginUtilities.loadData("VIPs", "VIPs", "");
-                    let id = getOwnerInstance(popout).props.user.id;
+                    let id = ReactUtilities.getOwnerInstance(popout).props.user.id;
                     let ids = data.ids ? data.ids.slice(0) : [];
                     let wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://cdn.iconscout.com/public/images/icon/free/png-24/star-bookmark-favorite-shape-rank-like-378019f0b9f54bcf-24x24.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
@@ -183,7 +187,7 @@ var VIPs = function() {
                                 vip.style.backgroundColor = "#fac02e";
                             }
                             if(document.querySelector(".friends-table") && (userModal = true)){
-                                getOwnerInstance(document.querySelector(".friends-table")).forceUpdate();
+                                ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate();
                                 userModal = false;
                             }
                         });
