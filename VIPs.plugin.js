@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.1"; }
+        getVersion() { return "1.1.2"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -25,9 +25,11 @@ var VIPs = function() {
         }
 
         getSettingsPanel() {
-            var panel = $("<form>").addClass("form").css("width", "100%");
+            var panel = document.createElement("form")
+            panel.setAttribute("class", "form");
+            panel.setAttribute("width", "100%");
             if (this.initialized) this.generateSettings(panel);
-		    return panel[0];
+		    return panel;
         }
 
         start() {
@@ -44,13 +46,11 @@ var VIPs = function() {
 
 
         initialize() {
-            let self = this;
+            let self = this, VIPIndex = -1, DMIndex = -1;
             self.initialized = true;           
             PluginUtilities.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
             const Friends = InternalUtilities.WebpackModules.findByDisplayName("Friends");
             const DirectMessages = InternalUtilities.WebpackModules.findByDisplayName("LazyScroller");
-            let VIPIndex = -1;
-            let DMIndex = -1;
 
             Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
@@ -92,8 +92,7 @@ var VIPs = function() {
 
 
             Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
-                let user;
-                let data = PluginUtilities.loadData("VIPs", "VIPs", "");
+                let user, data = PluginUtilities.loadData("VIPs", "VIPs", "");
                 if(data.ids){
                     if(data.ids.length > 0){
                         for (var idCounter = 0; idCounter < data.ids.length; idCounter++){
@@ -136,12 +135,11 @@ var VIPs = function() {
                     }
                 }
                 
-                let sections = returnValue.props.children[0].props.children.props.children;
+                let sections = returnValue.props.children[0].props.children.props.children, VIPs = [];
                 sections.push(sections[sections.length-2]);
                 sections.push(DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
                 sections[sections.length-1].key = "VIP";
    
-                let VIPs = [];
                 for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
                     let row = thisObject.state.rows._rows[rowCounter];
                     if(row.type == 99){ VIPs.push(row); }
@@ -178,17 +176,14 @@ var VIPs = function() {
                     for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
                         let row = thisObject.state.rows._rows[rowCounter];
                         if(row.type == 99){
-                            let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber];
-                            let wrapper = document.createElement('div');
+                            let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber], wrapper = document.createElement('div');
                             wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://cdn.iconscout.com/public/images/icon/free/png-24/star-bookmark-favorite-shape-rank-like-378019f0b9f54bcf-24x24.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                             if(additionalActions && additionalActions.childNodes.length == 0){
                                 additionalActions.appendChild(wrapper.firstChild);
                             }
                             let vip = additionalActions.querySelector(".VIP");
                             if(vip){
-                                let data = PluginUtilities.loadData("VIPs", "VIPs", "");
-                                let id = row.user.id;
-                                let ids = data.ids ? data.ids.slice(0) : [];
+                                let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = row.user.id, ids = data.ids ? data.ids.slice(0) : [];
                                 if(ids.indexOf(id) >= 0){
                                         vip.classList.add("selected");
                                         vip.style.backgroundColor = "#fac02e";
@@ -224,15 +219,43 @@ var VIPs = function() {
             PluginUtilities.showToast(this.getName() + " " + this.getVersion() + " has started.");
         }
 
+        onContextMenu(e) {
+            let target = e.target, context = document.querySelector(".contextMenu-HLZMGh");
+            if(context){
+                let data = PluginUtilities.loadData("VIPs", "VIPs", "");
+                context.childNodes.forEach((childNodes) => {
+                    childNodes.childNodes.forEach((childNode) => {
+                        if(childNode.textContent == "Block" && !childNode.nextSibling){
+                            let user = ReactUtilities.getOwnerInstance(context).props.user, wrapper = document.createElement('div'),
+                            isVIP = data.ids.some((id) => id == user.id), itemText = isVIP ? "Remove VIP" : "Add VIP";
+                            wrapper.innerHTML = `<div id="VIPContext" class="item-1Yvehc"><span>` + itemText + `</span></div>`;
+                            childNodes.insertBefore(wrapper.firstChild, childNode.nextSibling);
+                            document.getElementById("VIPContext").onclick = function(){ 
+                                let id = ReactUtilities.getOwnerInstance(context).props.user.id, ids = data.ids;
+                                if(this.textContent == "Remove VIP"){
+                                    if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
+                                    this.textContent = "Add VIP";
+                                } else {
+                                    if(ids.indexOf(id) < 0){ ids.push(id); }
+                                    this.textContent = "Remove VIP";
+                                }
+                                PluginUtilities.saveData("VIPs", "VIPs", {ids});
+                                if(document.querySelector(".friends-table")){ ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
        observer(e) {
+            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("contextMenu-HLZMGh")){ this.onContextMenu(e); }
+
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
-                let popout = document.querySelector(".inner-1JeGVc").childNodes[0];
-                let actions = document.querySelector(".additionalActionsIcon-1FoUlE");
+                let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
-                    let data = PluginUtilities.loadData("VIPs", "VIPs", "");
-                    let id = ReactUtilities.getOwnerInstance(popout).props.user.id;
-                    let ids = data.ids ? data.ids.slice(0) : [];
-                    let wrapper = document.createElement('div');
+                    let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = ReactUtilities.getOwnerInstance(popout).props.user.id, 
+                    ids = data.ids ? data.ids.slice(0) : [], wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://cdn.iconscout.com/public/images/icon/free/png-24/star-bookmark-favorite-shape-rank-like-378019f0b9f54bcf-24x24.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     DOMUtilities.insertAfter(wrapper.firstChild, actions);
                     let vip = popout.querySelector(".VIP");
