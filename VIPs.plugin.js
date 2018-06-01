@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.2"; }
+        getVersion() { return "1.1.3"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -59,7 +59,7 @@ var VIPs = function() {
                     for (var index = 0; index < thisObject.props.children.length; index++){
                         let child = thisObject.props.children[index];
                         if(child && data.ids && data.ids.length > 0){
-                            if(child.key == "Direct Messages" && thisObject.props.children[index-1].key != "VIPs"){
+                            if(child.type == "header" && !(child.key == "activity-button" || child.key == "VIPs") && thisObject.props.children[index-1].key != "VIPs"){
                                 if(VIPIndex == index || VIPIndex == -1){
                                     let VIPSection = DiscordModules.React.cloneElement(child);
                                     VIPIndex = index;
@@ -223,15 +223,20 @@ var VIPs = function() {
             let target = e.target, context = document.querySelector(".contextMenu-HLZMGh");
             if(context){
                 let data = PluginUtilities.loadData("VIPs", "VIPs", "");
-                context.childNodes.forEach((childNodes) => {
-                    childNodes.childNodes.forEach((childNode) => {
-                        if(childNode.textContent == "Block" && !childNode.nextSibling){
-                            let user = ReactUtilities.getOwnerInstance(context).props.user, wrapper = document.createElement('div'),
-                            isVIP = data.ids.some((id) => id == user.id), itemText = isVIP ? "Remove VIP" : "Add VIP";
+                for(var contextGroupCounter = 0; contextGroupCounter < context.childNodes.length; contextGroupCounter++){
+                    let contextMenuGroup = context.childNodes[contextGroupCounter];
+                    for(var contextItemCounter = 0; contextItemCounter < context.childNodes.length; contextItemCounter++){
+                        let contextMenuItem = contextMenuGroup.childNodes[contextItemCounter];
+                        let isFriend;
+                        try{ isFriend = ReactUtilities.getOwnerInstance(contextMenuItem); } catch(e) {};
+                        if(isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
+                            let user = ReactUtilities.getOwnerInstance(context).props.user, wrapper = document.createElement('div'), ids = data.ids ? data.ids.slice(0) : [], isVIP;                 
+                            if(ids){ isVIP = ids.some((id) => id == user.id) }
+                            let itemText = isVIP ? "Remove VIP" : "Add VIP";
                             wrapper.innerHTML = `<div id="VIPContext" class="item-1Yvehc"><span>` + itemText + `</span></div>`;
-                            childNodes.insertBefore(wrapper.firstChild, childNode.nextSibling);
+                            contextMenuGroup.insertBefore(wrapper.firstChild, contextMenuItem.nextSibling);
                             document.getElementById("VIPContext").onclick = function(){ 
-                                let id = ReactUtilities.getOwnerInstance(context).props.user.id, ids = data.ids;
+                                let id = ReactUtilities.getOwnerInstance(context).props.user.id;
                                 if(this.textContent == "Remove VIP"){
                                     if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
                                     this.textContent = "Add VIP";
@@ -241,10 +246,10 @@ var VIPs = function() {
                                 }
                                 PluginUtilities.saveData("VIPs", "VIPs", {ids});
                                 if(document.querySelector(".friends-table")){ ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
-                            }
+                                }
                         }
-                    });
-                });
+                    };
+                };
             }
         }
 
