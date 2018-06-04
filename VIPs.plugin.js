@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.5"; }
+        getVersion() { return "1.1.6"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -209,6 +209,13 @@ var VIPs = function() {
                                 }
                             }
                             vipRowNumber++;
+                        }
+                    }
+                } else{
+                    if(document.querySelector(".VIP")){
+                        for(var VIPCounter = 0; VIPCounter < document.querySelectorAll(".VIP").length; VIPCounter++){
+                            let VIPIcon = document.querySelectorAll(".VIP")[VIPCounter];
+                            VIPIcon.remove();
                         }
                     }
                 }
