@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.6"; }
+        getVersion() { return "1.1.7"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -145,6 +145,8 @@ var VIPs = function() {
                     if(row.type == 99){ VIPs.push(row); }
                 };
 
+                VIPs.sort(function(a,b) {return (a.usernameLower > b.usernameLower) ? 1 : ((b.usernameLower > a.usernameLower) ? -1 : 0);} );
+
                 try{
                     if(thisObject.state.section == "VIP"){
                         if(returnValue.props.children[1].props.children[1].props.children.props){
@@ -177,7 +179,7 @@ var VIPs = function() {
                         let row = thisObject.state.rows._rows[rowCounter];
                         if(row.type == 99){
                             let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber], wrapper = document.createElement('div');
-                            wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://cdn.iconscout.com/public/images/icon/free/png-24/star-bookmark-favorite-shape-rank-like-378019f0b9f54bcf-24x24.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
+                            wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                             if(additionalActions && additionalActions.childNodes.length == 0){
                                 additionalActions.appendChild(wrapper.firstChild);
                             }
@@ -268,7 +270,7 @@ var VIPs = function() {
                 if(popout && actions){
                     let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = ReactUtilities.getOwnerInstance(popout).props.user.id, 
                     ids = data.ids ? data.ids.slice(0) : [], wrapper = document.createElement('div');
-                    wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://cdn.iconscout.com/public/images/icon/free/png-24/star-bookmark-favorite-shape-rank-like-378019f0b9f54bcf-24x24.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
+                    wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     DOMUtilities.insertAfter(wrapper.firstChild, actions);
                     let vip = popout.querySelector(".VIP");
                     if(vip){
