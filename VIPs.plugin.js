@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.8"; }
+        getVersion() { return "1.1.9"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -51,7 +51,7 @@ var VIPs = function() {
             PluginUtilities.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
             const Friends = InternalUtilities.WebpackModules.findByDisplayName("Friends");
             const DirectMessages = InternalUtilities.WebpackModules.findByDisplayName("LazyScroller");
-            
+
             Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
                 let data = PluginUtilities.loadData("VIPs", "VIPs", "");
@@ -74,24 +74,18 @@ var VIPs = function() {
                                     let id = data.ids[idCounter];
                                     if(index > DMIndex && child.props.channel.recipients){
                                         if(self.settings.GroupDMs){
+                                            let groupVIPIndexCounter = 3;
                                             for(var recipientCounter = 0; recipientCounter < child.props.channel.recipients.length; recipientCounter++){
                                                 let recipient = child.props.channel.recipients[recipientCounter];
-                                                if(recipient == id){
-                                                    let groupVIPIndexCounter = VIPIndex+1;
-                                                    for(;groupVIPIndexCounter < DMIndex; groupVIPIndexCounter++){
-                                                        if(DiscordModules.UserStore.getUser(thisObject.props.children[groupVIPIndexCounter].props.channel.recipients[0]) > DiscordModules.UserStore.getUser(child.props.channel.recipients[0])){ break; }
-                                                    }
-                                                    thisObject.props.children.splice(groupVIPIndexCounter, 0, thisObject.props.children.splice(index, 1)[0]); 
+                                                if(recipient == id){ 
+                                                    groupVIPIndexCounter = VIPIndex+1; 
+                                                    thisObject.props.children.splice(groupVIPIndexCounter, 0, thisObject.props.children.splice(index, 1)[0]);
                                                     DMIndex += 1;
                                                 }
                                             }
                                         } else {
                                             if(child.props.channel.recipients[0] == id && child.props.channel.type == 1){
-                                                let VIPIndexCounter = VIPIndex+1;
-                                                for(;VIPIndexCounter < DMIndex; VIPIndexCounter++){
-                                                    if(DiscordModules.UserStore.getUser(thisObject.props.children[VIPIndexCounter].props.channel.recipients[0]) > DiscordModules.UserStore.getUser(child.props.channel.recipients[0])){ break; }
-                                                }
-                                                thisObject.props.children.splice(VIPIndexCounter, 0, thisObject.props.children.splice(index, 1)[0]);
+                                                thisObject.props.children.splice(DMIndex, 0, thisObject.props.children.splice(index, 1)[0]);
                                                 DMIndex += 1;
                                             }
                                         }
