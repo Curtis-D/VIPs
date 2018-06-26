@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.1.9"; }
+        getVersion() { return "1.2.0"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -74,12 +74,9 @@ var VIPs = function() {
                                     let id = data.ids[idCounter];
                                     if(index > DMIndex && child.props.channel.recipients){
                                         if(self.settings.GroupDMs){
-                                            let groupVIPIndexCounter = 3;
-                                            for(var recipientCounter = 0; recipientCounter < child.props.channel.recipients.length; recipientCounter++){
-                                                let recipient = child.props.channel.recipients[recipientCounter];
-                                                if(recipient == id){ 
-                                                    groupVIPIndexCounter = VIPIndex+1; 
-                                                    thisObject.props.children.splice(groupVIPIndexCounter, 0, thisObject.props.children.splice(index, 1)[0]);
+                                            if(index > DMIndex && child.props.channel.recipients[0] == id){
+                                                if(self.settings.GroupDMs){
+                                                    thisObject.props.children.splice(DMIndex, 0, thisObject.props.children.splice(index, 1)[0]);
                                                     DMIndex += 1;
                                                 }
                                             }
