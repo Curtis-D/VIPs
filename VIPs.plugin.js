@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.2.0"; }
+        getVersion() { return "1.2.1"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -275,7 +275,7 @@ var VIPs = function() {
                     let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = ReactUtilities.getOwnerInstance(popout).props.user.id, 
                     ids = data.ids ? data.ids.slice(0) : [], wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
-                    DOMUtilities.insertAfter(wrapper.firstChild, actions);
+                    DOMUtilities.insertAfter(wrapper.firstChild, actions.parentNode);
                     let vip = popout.querySelector(".VIP");
                     if(vip){
                         if(ids.indexOf(id) >= 0){
