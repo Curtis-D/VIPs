@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.2.1"; }
+        getVersion() { return "1.2.2"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -32,7 +32,7 @@ var VIPs = function() {
 		    return panel;
         }
 
-        start() {
+        start() {	
             var libraryScript = document.getElementById('zeresLibraryScript');
             if (libraryScript) libraryScript.parentElement.removeChild(libraryScript);
             libraryScript = document.createElement("script");
@@ -242,7 +242,7 @@ var VIPs = function() {
                         let contextMenuItem = contextMenuGroup.childNodes[contextItemCounter];
                         let isFriend;
                         try{ isFriend = ReactUtilities.getOwnerInstance(contextMenuItem); } catch(e) {};
-                        if(isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
+                        if((contextMenuItem.textContent == "Block" && !contextMenuItem.nextSibling) || isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
                             let user = ReactUtilities.getOwnerInstance(context).props.user, wrapper = document.createElement('div'), ids = data.ids ? data.ids.slice(0) : [], isVIP;                 
                             if(ids){ isVIP = ids.some((id) => id == user.id) }
                             let itemText = isVIP ? "Remove VIP" : "Add VIP";
