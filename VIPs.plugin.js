@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.3.3"; }
+        getVersion() { return "1.3.4"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -182,7 +182,7 @@ var VIPs = function() {
                     for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
                         let row = thisObject.state.rows._rows[rowCounter];
                         if(row.type == 99){
-                            let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber], wrapper = document.createElement('div');
+                            let additionalActions = document.querySelectorAll(".friends-column-actions")[vipRowNumber], wrapper = document.createElement('div');
                             wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                             if(additionalActions && additionalActions.childNodes.length == 0){
                                 additionalActions.appendChild(wrapper.firstChild);
@@ -194,8 +194,8 @@ var VIPs = function() {
                                     vip.classList.add("selected");
                                     vip.style.backgroundColor = "#fac02e";
                                 }
-                                if(userModal && document.querySelectorAll(".friends-column-actions-visible").length != 1){
-                                    if(document.querySelectorAll(".friends-column-actions-visible").length-2 == vipRowNumber){ userModal = false; }
+                                if(userModal && document.querySelectorAll(".friends-column-actions").length != 1){
+                                    if(document.querySelectorAll(".friends-column-actions").length-2 == vipRowNumber){ userModal = false; }
                                 } else{
                                     vip.addEventListener("click", function(e) {
                                         e.stopPropagation();
