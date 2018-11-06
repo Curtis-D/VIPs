@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.3.4"; }
+        getVersion() { return "1.3.5"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -182,7 +182,7 @@ var VIPs = function() {
                     for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
                         let row = thisObject.state.rows._rows[rowCounter];
                         if(row.type == 99){
-                            let additionalActions = document.querySelectorAll(".friends-column-actions")[vipRowNumber], wrapper = document.createElement('div');
+                            let additionalActions = document.querySelectorAll(".friends-column-actions-visible")[vipRowNumber], wrapper = document.createElement('div');
                             wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                             if(additionalActions && additionalActions.childNodes.length == 0){
                                 additionalActions.appendChild(wrapper.firstChild);
@@ -194,7 +194,7 @@ var VIPs = function() {
                                     vip.classList.add("selected");
                                     vip.style.backgroundColor = "#fac02e";
                                 }
-                                if(userModal && document.querySelectorAll(".friends-column-actions").length != 1){
+                                if(userModal && document.querySelectorAll(".friends-column-actions-visible").length != 1){
                                     if(document.querySelectorAll(".friends-column-actions").length-2 == vipRowNumber){ userModal = false; }
                                 } else{
                                     vip.addEventListener("click", function(e) {
@@ -242,7 +242,7 @@ var VIPs = function() {
                         let isFriend;
                         try{ isFriend = ZLibrary.ReactTools.getOwnerInstance(contextMenuItem); } catch(e) {};
                         if(contextMenuItem.textContent == "Show on Games Tab" && ((contextMenuItem.nextSibling.textContent != "Remove VIP") && (contextMenuItem.nextSibling.textContent != "Add VIP")) || isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
-                            let user = ZLibrary.ReactTools.getOwnerInstance(context).props.children.props.children.props.children[1].props.children[0].props.user, wrapper = document.createElement('div'), isVIP;                 
+                            let user = ZLibrary.ReactTools.getReactProperty(context, "return.return.return.return.memoizedProps.user"), wrapper = document.createElement('div'), isVIP;                 
                             if(ids){ isVIP = ids.some((id) => id == user.id) }
                             let itemText = isVIP ? "Remove VIP" : "Add VIP";
                             wrapper.innerHTML = `<div id="VIPContext" class="item-1Yvehc"><span>` + itemText + `</span></div>`;
@@ -271,7 +271,7 @@ var VIPs = function() {
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
                 let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
-                    let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids), id = ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".da-modal")).props.children.props.children.props.user.id,
+                    let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids), id = ZLibrary.ReactTools.getReactProperty(document.querySelector(".da-root"), "return.return.return.return.return.memoizedProps.currentUserId"),
                     wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     ZLibrary.DOMTools.insertAfter(wrapper.firstChild, actions.parentNode);
