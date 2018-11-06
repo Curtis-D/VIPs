@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.2.2"; }
+        getVersion() { return "1.3.1"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -37,7 +37,7 @@ var VIPs = function() {
             if (libraryScript) libraryScript.parentElement.removeChild(libraryScript);
             libraryScript = document.createElement("script");
             libraryScript.setAttribute("type", "text/javascript");
-            libraryScript.setAttribute("src", "https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js");
+            libraryScript.setAttribute("src", "https://rauenzi.github.io/BDPluginLibrary/release/ZLibrary.js");
             libraryScript.setAttribute("id", "zeresLibraryScript");
             document.head.appendChild(libraryScript);
             if (typeof window.ZeresLibrary !== "undefined") this.initialize();
@@ -49,8 +49,8 @@ var VIPs = function() {
             let self = this, VIPIndex = -1, DMIndex = -1;
             self.initialized = true;           
             PluginUtilities.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
-            const Friends = InternalUtilities.WebpackModules.findByDisplayName("Friends");
-            const DirectMessages = InternalUtilities.WebpackModules.findByDisplayName("LazyScroller");
+            const Friends = ZLibrary.WebpackModules.findByDisplayName("Friends");
+            const DirectMessages = ZLibrary.WebpackModules.findByDisplayName("LazyScroller");
 
             Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
@@ -108,11 +108,11 @@ var VIPs = function() {
                                     if(DiscordModules.GuildMemberStore.isMember(guild.id, id)){ mutualGuilds.push(guild); }
                                 }
                                 let objectRow = new (thisObject.state.rows._rows[0].constructor)({
-                                    activity: DiscordModules.UserStatusStore.getActivity(id),
+                                    activity: DiscordModules.UserActivityStore.getActivity(id),
                                     key: id,
                                     mutualGuilds: mutualGuilds,
                                     mutualGuildsLength: mutualGuilds.length,
-                                    status: DiscordModules.UserStatusStore.getStatus(id),
+                                    status: ZLibrary.DiscordModules.UserStatusStore.getStatus(id),
                                     type: 99,
                                     user: user,
                                     usernameLower: user.usernameLowerCase
@@ -227,13 +227,13 @@ var VIPs = function() {
                 }
             });
 
-            if(document.querySelector(".friends-table")){ ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
+            if(document.querySelector(".friends-table")){ ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
 
             PluginUtilities.showToast(this.getName() + " " + this.getVersion() + " has started.");
         }
 
         onContextMenu(e) {
-            let target = e.target, context = document.querySelector(".contextMenu-HLZMGh");
+            let target = e.target, context = document.querySelector(".da-contextMenu");
             if(context){
                 let data = PluginUtilities.loadData("VIPs", "VIPs", "");
                 for(var contextGroupCounter = 0; contextGroupCounter < context.childNodes.length; contextGroupCounter++){
@@ -241,15 +241,15 @@ var VIPs = function() {
                     for(var contextItemCounter = 0; contextItemCounter < contextMenuGroup.childNodes.length; contextItemCounter++){
                         let contextMenuItem = contextMenuGroup.childNodes[contextItemCounter];
                         let isFriend;
-                        try{ isFriend = ReactUtilities.getOwnerInstance(contextMenuItem); } catch(e) {};
-                        if((contextMenuItem.textContent == "Block" && !contextMenuItem.nextSibling) || isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
-                            let user = ReactUtilities.getOwnerInstance(context).props.user, wrapper = document.createElement('div'), ids = data.ids ? data.ids.slice(0) : [], isVIP;                 
+                        try{ isFriend = ZLibrary.ReactTools.getOwnerInstance(contextMenuItem); } catch(e) {};
+                        if(contextMenuItem.textContent == "Show on Games Tab" && ((contextMenuItem.nextSibling.textContent != "Remove VIP") && (contextMenuItem.nextSibling.textContent != "Add VIP")) || isFriend && isFriend.handleBlock && !contextMenuItem.nextSibling){
+                            let user = ZLibrary.ReactTools.getOwnerInstance(context).props.children.props.children.props.children[1].props.children[0].props.user, wrapper = document.createElement('div'), ids = data.ids ? data.ids.slice(0) : [], isVIP;                 
                             if(ids){ isVIP = ids.some((id) => id == user.id) }
                             let itemText = isVIP ? "Remove VIP" : "Add VIP";
                             wrapper.innerHTML = `<div id="VIPContext" class="item-1Yvehc"><span>` + itemText + `</span></div>`;
                             contextMenuGroup.insertBefore(wrapper.firstChild, contextMenuItem.nextSibling);
                             document.getElementById("VIPContext").onclick = function(){ 
-                                let id = ReactUtilities.getOwnerInstance(context).props.user.id;
+                                let id = user.id;
                                 if(this.textContent == "Remove VIP"){
                                     if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
                                     this.textContent = "Add VIP";
@@ -258,7 +258,7 @@ var VIPs = function() {
                                     this.textContent = "Remove VIP";
                                 }
                                 PluginUtilities.saveData("VIPs", "VIPs", {ids});
-                                if(document.querySelector(".friends-table")){ ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
+                                if(document.querySelector(".friends-table")){ ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
                                 }
                         }
                     };
@@ -267,12 +267,12 @@ var VIPs = function() {
         }
 
        observer(e) {
-            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("contextMenu-HLZMGh")){ this.onContextMenu(e); }
+            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("da-contextMenu")){ this.onContextMenu(e); }
 
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
                 let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
-                    let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = ReactUtilities.getOwnerInstance(popout).props.user.id, 
+                    let data = PluginUtilities.loadData("VIPs", "VIPs", ""), id = ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".da-modal")).props.children.props.children.props.user.id,
                     ids = data.ids ? data.ids.slice(0) : [], wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     DOMUtilities.insertAfter(wrapper.firstChild, actions.parentNode);
@@ -295,7 +295,7 @@ var VIPs = function() {
                                 vip.style.backgroundColor = "#fac02e";
                             }
                             if(document.querySelector(".friends-table") && (userModal = true)){
-                                ReactUtilities.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate();
+                                ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate();
                                 userModal = false;
                             }
                         });
