@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.3.2"; }
+        getVersion() { return "1.3.3"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -38,7 +38,7 @@ var VIPs = function() {
             libraryScript = document.createElement("script");
             libraryScript.setAttribute("type", "text/javascript");
             libraryScript.setAttribute("src", "https://rauenzi.github.io/BDPluginLibrary/release/ZLibrary.js");
-            libraryScript.setAttribute("id", "zeresLibraryScript");
+            libraryScript.setAttribute("id", "zLibraryScript");
             document.head.appendChild(libraryScript);
             if (typeof window.ZeresLibrary !== "undefined") this.initialize();
             else libraryScript.addEventListener("load", () => { this.initialize(); });
@@ -52,16 +52,16 @@ var VIPs = function() {
             const Friends = ZLibrary.WebpackModules.findByDisplayName("Friends");
             const DirectMessages = ZLibrary.WebpackModules.findByDisplayName("LazyScroller");
 
-            Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
+            ZLibrary.Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 ZLibrary.PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
-                let ids = Object.values(PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
                 if(self.settings.VIPPinDMs){
                     for (var index = 0; index < thisObject.props.children.length; index++){
                         let child = thisObject.props.children[index];
                         if(child && ids && ids.length > 0){
                             if(child.type == "header" && !(child.key == "activity-button" || child.key == "VIPs") && thisObject.props.children[index-1].key != "VIPs"){
                                 if(VIPIndex == index || VIPIndex == -1){
-                                    let VIPSection = DiscordModules.React.cloneElement(child);
+                                    let VIPSection = ZLibrary.DiscordModules.React.cloneElement(child);
                                     VIPIndex = index;
                                     VIPSection.key = "VIPs";
                                     VIPSection.props.children = "VIPs";
@@ -95,20 +95,20 @@ var VIPs = function() {
             });
 
 
-            Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
+            ZLibrary.Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
                 let user, ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
                 if(ids){
                     if(ids.length > 0){
                         for (var idCounter = 0; idCounter < ids.length; idCounter++){
                             let id = ids[idCounter];
-                            if((thisObject.state.rows._rows[0]) && (user = DiscordModules.UserStore.getUser(id))){
+                            if((thisObject.state.rows._rows[0]) && (user = ZLibrary.DiscordModules.UserStore.getUser(id))){
                                 let mutualGuilds = [];
-                                for (var guildCounter = 0; guildCounter < Object.values(DiscordModules.GuildStore.getGuilds()).length; guildCounter++){
-                                    let guild = Object.values(DiscordModules.GuildStore.getGuilds())[guildCounter];
-                                    if(DiscordModules.GuildMemberStore.isMember(guild.id, id)){ mutualGuilds.push(guild); }
+                                for (var guildCounter = 0; guildCounter < Object.values(ZLibrary.DiscordModules.GuildStore.getGuilds()).length; guildCounter++){
+                                    let guild = Object.values(ZLibrary.DiscordModules.GuildStore.getGuilds())[guildCounter];
+                                    if(ZLibrary.DiscordModules.GuildMemberStore.isMember(guild.id, id)){ mutualGuilds.push(guild); }
                                 }
                                 let objectRow = new (thisObject.state.rows._rows[0].constructor)({
-                                    activity: DiscordModules.UserActivityStore.getActivity(id),
+                                    activity: ZLibrary.DiscordModules.UserActivityStore.getActivity(id),
                                     key: id,
                                     mutualGuilds: mutualGuilds,
                                     mutualGuildsLength: mutualGuilds.length,
@@ -141,7 +141,7 @@ var VIPs = function() {
                 
                 let sections = returnValue.props.children[0].props.children.props.children, VIPs = [];
                 sections.push(sections[sections.length-2]);
-                sections.push(DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
+                sections.push(ZLibrary.DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
                 sections[sections.length-1].key = "VIP";
    
                 for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
@@ -161,11 +161,11 @@ var VIPs = function() {
                         if(!Row) { return };
                         if(returnValue.props.children[1].props.children[1].props.children.props){
                             returnValue.props.children[1].props.children[1].props.children.props.children = VIPs.map(vip=>{
-                                return DiscordModules.React.createElement(Row, Object.assign({}, vip));
+                                return ZLibrary.DiscordModules.React.createElement(Row, Object.assign({}, vip));
                             });
                         } else {
                             returnValue.props.children[1].props.children[1].props.children = VIPs.map(vip=>{
-                                return DiscordModules.React.createElement(Row, Object.assign({}, vip));
+                                return ZLibrary.DiscordModules.React.createElement(Row, Object.assign({}, vip));
                             });
                         }
                     }
@@ -176,7 +176,7 @@ var VIPs = function() {
                 }
             });
 
-            Patcher.instead(this.getName(), Friends.prototype, "componentDidUpdate", function(thisObject) {
+            ZLibrary.Patcher.instead(this.getName(), Friends.prototype, "componentDidUpdate", function(thisObject) {
                 let vipRowNumber = 0;
                 if(thisObject.state.section == "VIP"){
                     for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
@@ -187,8 +187,8 @@ var VIPs = function() {
                             if(additionalActions && additionalActions.childNodes.length == 0){
                                 additionalActions.appendChild(wrapper.firstChild);
                             }
-                            let vip = additionalActions.querySelector(".VIP");
-                            if(vip){
+                            if(typeof(additionalActions) == "object"){
+                                let vip = additionalActions.querySelector(".VIP");
                                 let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids), id = row.user.id;
                                 if(ids.indexOf(id) >= 0){
                                     vip.classList.add("selected");
@@ -304,7 +304,7 @@ var VIPs = function() {
         }
 
         stop() {
-            Patcher.unpatchAll(this.getName());
+            ZLibrary.Patcher.unpatchAll(this.getName());
         }
 
     }
