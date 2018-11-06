@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.0"; }
+        getVersion() { return "1.4.1"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -18,9 +18,9 @@ var VIPs = function() {
         
         generateSettings(panel) {
             ZLibrary.PluginUtilities.loadSettings(this.getName(), this.defaultSettings);
-            new PluginSettings.ControlGroup("VIP Settings", () => {ZLibrary.PluginUtilities.saveSettings(this.getName(), this.settings);}, {shown: true}).appendTo(panel).append(
-                new PluginSettings.Checkbox("Pin VIPs to DMs", "", this.settings.VIPPinDMs, (checked) => {this.settings.VIPPinDMs = checked;}),
-                new PluginSettings.Checkbox("Include Group DMs", "", this.settings.GroupDMs, (checked) => {this.settings.GroupDMs = checked;})
+            new ZLibrary.Settings.SettingGroup("VIP Settings", {callback: () => {ZLibrary.PluginUtilities.saveSettings(this.getName(), this.settings);}, shown: true}).appendTo(panel).append(
+                new ZLibrary.Settings.Switch("Pin VIPs to DMs", "", this.settings.VIPPinDMs, (checked) => {this.settings.VIPPinDMs = checked;}),
+                new ZLibrary.Settings.Switch("Include Group DMs", "", this.settings.GroupDMs, (checked) => {this.settings.GroupDMs = checked;})
             );
         }
 
