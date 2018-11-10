@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.1"; }
+        getVersion() { return "1.4.2"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -54,7 +54,9 @@ var VIPs = function() {
 
             ZLibrary.Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 ZLibrary.PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
-                let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                }
                 if(self.settings.VIPPinDMs){
                     for (var index = 0; index < thisObject.props.children.length; index++){
                         let child = thisObject.props.children[index];
@@ -96,7 +98,10 @@ var VIPs = function() {
 
 
             ZLibrary.Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
-                let user, ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                }
+                let user;
                 if(ids){
                     if(ids.length > 0){
                         for (var idCounter = 0; idCounter < ids.length; idCounter++){
@@ -189,7 +194,10 @@ var VIPs = function() {
                             }
                             if(typeof(additionalActions) == "object"){
                                 let vip = additionalActions.querySelector(".VIP");
-                                let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids), id = row.user.id;
+                                if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
+                                }
+                                let id = row.user.id;
                                 if(ids.indexOf(id) >= 0){
                                     vip.classList.add("selected");
                                     vip.style.backgroundColor = "#fac02e";
@@ -199,7 +207,9 @@ var VIPs = function() {
                                 } else{
                                     vip.addEventListener("click", function(e) {
                                         e.stopPropagation();
-                                        ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                                        if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                                            ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                                        }
                                         if(vip.classList.contains("selected")) {
                                             if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
                                             vip.classList.remove("selected");
@@ -234,7 +244,9 @@ var VIPs = function() {
         onContextMenu(e) {
             let target = e.target, context = document.querySelector(".da-contextMenu");
             if(context){
-                let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                }
                 for(var contextGroupCounter = 0; contextGroupCounter < context.childNodes.length; contextGroupCounter++){
                     let contextMenuGroup = context.childNodes[contextGroupCounter];
                     for(var contextItemCounter = 0; contextItemCounter < contextMenuGroup.childNodes.length; contextItemCounter++){
@@ -271,7 +283,10 @@ var VIPs = function() {
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
                 let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
-                    let ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids), id = ZLibrary.ReactTools.getReactProperty(document.querySelector(".da-root"), "return.return.return.return.return.memoizedProps.currentUserId"),
+                    if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
+                        var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
+                    }
+                    let id = ZLibrary.ReactTools.getReactProperty(document.querySelector(".da-root"), "return.return.return.return.return.memoizedProps.user.id"),
                     wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     ZLibrary.DOMTools.insertAfter(wrapper.firstChild, actions.parentNode);
