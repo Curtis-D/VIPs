@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.2"; }
+        getVersion() { return "1.4.3"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -33,7 +33,7 @@ var VIPs = function() {
         }
 
         start() {	
-            var libraryScript = document.getElementById('zeresLibraryScript');
+            var libraryScript = document.getElementById('zLibraryScript');
             if (libraryScript) libraryScript.parentElement.removeChild(libraryScript);
             libraryScript = document.createElement("script");
             libraryScript.setAttribute("type", "text/javascript");
@@ -270,6 +270,7 @@ var VIPs = function() {
                                 }
                                 ZLibrary.PluginUtilities.saveData("VIPs", "VIPs", {ids});
                                 if(document.querySelector(".friends-table")){ ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate(); }
+                                if(document.querySelector(".scroller-2FKFPG")){ console.log(ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".scroller-2FKFPG")).updateScrollBar()); }
                                 }
                         }
                     };
@@ -292,21 +293,23 @@ var VIPs = function() {
                     ZLibrary.DOMTools.insertAfter(wrapper.firstChild, actions.parentNode);
                     let vip = popout.querySelector(".VIP");
                     if(vip){
-                        if(ids.indexOf(id) >= 0){
+                        if(ids.indexOf(id) >= 0 && vip.classList){
                             vip.classList.add("selected");
                             vip.style.backgroundColor = "#fac02e";
                         }
                         vip.addEventListener("click", function() {
-                            if(vip.classList.contains("selected")) {
-                                if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
-                                ZLibrary.PluginUtilities.saveData("VIPs", "VIPs", {ids});
-                                vip.classList.remove("selected");
-                                vip.style.backgroundColor = "#fff";
-                            } else {
-                                if(ids.indexOf(id) < 0){ ids.push(id); }
-                                ZLibrary.PluginUtilities.saveData("VIPs", "VIPs", {ids});
-                                vip.classList.add("selected");
-                                vip.style.backgroundColor = "#fac02e";
+                            if(vip.classList){
+                                if(vip.classList.contains("selected")) {
+                                    if(ids.indexOf(id) >= 0){ ids.splice(ids.indexOf(id), 1); }
+                                    ZLibrary.PluginUtilities.saveData("VIPs", "VIPs", {ids});
+                                    vip.classList.remove("selected");
+                                    vip.style.backgroundColor = "#fff";
+                                } else {
+                                    if(ids.indexOf(id) < 0){ ids.push(id); }
+                                    ZLibrary.PluginUtilities.saveData("VIPs", "VIPs", {ids});
+                                    vip.classList.add("selected");
+                                    vip.style.backgroundColor = "#fac02e";
+                                }
                             }
                             if(document.querySelector(".friends-table") && (userModal = true)){
                                 ZLibrary.ReactTools.getOwnerInstance(document.querySelector(".friends-table")).forceUpdate();
