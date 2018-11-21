@@ -6,7 +6,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.4"; }
+        getVersion() { return "1.4.5"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -46,7 +46,7 @@ var VIPs = function() {
 
 
         initialize() {
-            let self = this, VIPIndex = -1, DMIndex = -1;
+            let self = this, VIPIndex = -1, DMIndex = -1, ids = [];
             self.initialized = true;           
             ZLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
             const Friends = ZLibrary.WebpackModules.findByDisplayName("Friends");
@@ -55,7 +55,7 @@ var VIPs = function() {
             ZLibrary.Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 ZLibrary.PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
-                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                    ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
                 }
                 if(self.settings.VIPPinDMs){
                     for (var index = 0; index < thisObject.props.children.length; index++){
@@ -98,10 +98,10 @@ var VIPs = function() {
 
 
             ZLibrary.Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
+                let user, ids = [];
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
-                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                    ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
                 }
-                let user;
                 if(ids){
                     if(ids.length > 0){
                         for (var idCounter = 0; idCounter < ids.length; idCounter++){
@@ -182,7 +182,7 @@ var VIPs = function() {
             });
 
             ZLibrary.Patcher.instead(this.getName(), Friends.prototype, "componentDidUpdate", function(thisObject) {
-                let vipRowNumber = 0;
+                let vipRowNumber = 0, ids = [];
                 if(thisObject.state.section == "VIP"){
                     for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
                         let row = thisObject.state.rows._rows[rowCounter];
@@ -195,7 +195,7 @@ var VIPs = function() {
                             if(typeof(additionalActions) == "object"){
                                 let vip = additionalActions.querySelector(".VIP");
                                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
-                                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
+                                    ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
                                 }
                                 let id = row.user.id;
                                 if(ids.indexOf(id) >= 0){
@@ -242,10 +242,10 @@ var VIPs = function() {
         }
 
         onContextMenu(e) {
-            let target = e.target, context = document.querySelector(".da-contextMenu");
+            let target = e.target, context = document.querySelector(".da-contextMenu"), ids = [];
             if(context){
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
-                    var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
+                    ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
                 }
                 for(var contextGroupCounter = 0; contextGroupCounter < context.childNodes.length; contextGroupCounter++){
                     let contextMenuGroup = context.childNodes[contextGroupCounter];
@@ -278,13 +278,14 @@ var VIPs = function() {
         }
 
        observer(e) {
+            let ids = [];
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("da-contextMenu")){ this.onContextMenu(e); }
 
             if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
                 let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
                 if(popout && actions){
                     if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
-                        var ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
+                        ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
                     }
                     let id = ZLibrary.ReactTools.getReactProperty(document.querySelector(".da-root"), "return.return.return.return.return.memoizedProps.user.id"),
                     wrapper = document.createElement('div');
