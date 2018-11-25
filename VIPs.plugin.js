@@ -2,11 +2,15 @@
 var VIPs = function() {
     "use strict";
     var userModal;
+    const contextMenuClass = ZLibrary.DiscordClassModules.ContextMenu.contextMenu;
+    const modalClass = ZLibrary.DiscordClassModules.Modals.modal;
+    const additionalActionsClass = ZLibrary.DiscordClassModules.UserModal.additionalActionsIcon;
+    const innerClass = ZLibrary.DiscordClassModules.Modals.inner;
 
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.5"; }
+        getVersion() { return "1.4.6"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -242,7 +246,7 @@ var VIPs = function() {
         }
 
         onContextMenu(e) {
-            let target = e.target, context = document.querySelector(".da-contextMenu"), ids = [];
+            let target = e.target, context = document.querySelector("." + contextMenuClass), ids = [];
             if(context){
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
                     ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
@@ -279,15 +283,15 @@ var VIPs = function() {
 
        observer(e) {
             let ids = [];
-            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("da-contextMenu")){ this.onContextMenu(e); }
+            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains(contextMenuClass.split(" ")[0])){ this.onContextMenu(e); }
 
-            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains("modal-1UGdnR")){                     
-                let popout = document.querySelector(".inner-1JeGVc").childNodes[0], actions = document.querySelector(".additionalActionsIcon-1FoUlE");
+            if(e.addedNodes.length && e.addedNodes[0].classList && e.addedNodes[0].classList.contains(modalClass.split(" ")[0])){                     
+                let popout = document.querySelector("." + innerClass.split(" ")[0]).childNodes[0], actions = document.querySelector("." + additionalActionsClass.split(" ")[0]);
                 if(popout && actions){
                     if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
                         ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
                     }
-                    let id = ZLibrary.ReactTools.getReactProperty(document.querySelector(".da-root"), "return.return.return.return.return.memoizedProps.user.id"),
+                    let id = ZLibrary.ReactTools.getReactProperty(document.querySelector(ZLibrary.DiscordClassModules.UserModal.root), "return.return.return.return.return.memoizedProps.user.id"),
                     wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     ZLibrary.DOMTools.insertAfter(wrapper.firstChild, actions.parentNode);
