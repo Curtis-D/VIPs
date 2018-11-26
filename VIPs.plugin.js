@@ -10,7 +10,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.7"; }
+        getVersion() { return "1.4.8"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -246,7 +246,7 @@ var VIPs = function() {
         }
 
         onContextMenu(e) {
-            let target = e.target, context = document.querySelector("." + contextMenuClass), ids = [];
+            let target = e.target, context = document.querySelector("." + contextMenuClass.split(" ")[0]), ids = [];
             if(context){
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
                     ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids);
@@ -291,7 +291,7 @@ var VIPs = function() {
                     if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
                         ids = Object.values(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids)
                     }
-                    let id = ZLibrary.ReactTools.getReactProperty(document.querySelector("." + ZLibrary.DiscordClassModules.UserModal.root), "return.return.return.return.return.memoizedProps.user.id"),
+                    let id = ZLibrary.ReactTools.getReactProperty(document.querySelector("." + ZLibrary.DiscordClassModules.UserModal.root.split(" ")[0]), "return.return.return.return.return.memoizedProps.user.id"),
                     wrapper = document.createElement('div');
                     wrapper.innerHTML = `<div class="VIP" style="-webkit-mask-image: url('https://i.imgur.com/Et8gpFg.png'); cursor: pointer; height: 24px; margin-left: 8px; width: 24px; background-color: #fff;"></div>`;
                     ZLibrary.DOMTools.insertAfter(wrapper.firstChild, actions.parentNode);
