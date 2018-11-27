@@ -2,15 +2,15 @@
 var VIPs = function() {
     "use strict";
     var userModal;
-    const contextMenuClass = ZLibrary.DiscordClassModules.ContextMenu.contextMenu;
-    const modalClass = ZLibrary.DiscordClassModules.Modals.modal;
-    const additionalActionsClass = ZLibrary.DiscordClassModules.UserModal.additionalActionsIcon;
-    const innerClass = ZLibrary.DiscordClassModules.Modals.inner;
+    const contextMenuClass = "contextMenu-HLZMGh";
+    const modalClass = "modal-1UGdnR";
+    const additionalActionsClass = "additionalActionsIcon-1FoUlE";
+    const innerClass = "inner-1JeGVc";
 
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.8"; }
+        getVersion() { return "1.4.9"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -19,30 +19,14 @@ var VIPs = function() {
             this.defaultSettings = {GroupDMs: true, VIPPinDMs: true};
             this.settings = this.defaultSettings;
         }
-        
-        generateSettings(panel) {
-            ZLibrary.PluginUtilities.loadSettings(this.getName(), this.defaultSettings);
-            new ZLibrary.Settings.SettingGroup("VIP Settings", {callback: () => {ZLibrary.PluginUtilities.saveSettings(this.getName(), this.settings);}, shown: true}).appendTo(panel).append(
-                new ZLibrary.Settings.Switch("Pin VIPs to DMs", "", this.settings.VIPPinDMs, (checked) => {this.settings.VIPPinDMs = checked;}),
-                new ZLibrary.Settings.Switch("Include Group DMs", "", this.settings.GroupDMs, (checked) => {this.settings.GroupDMs = checked;})
-            );
-        }
-
-        getSettingsPanel() {
-            var panel = document.createElement("form")
-            panel.setAttribute("class", "form");
-            panel.setAttribute("width", "100%");
-            if (this.initialized) this.generateSettings(panel);
-		    return panel;
-        }
 
         start() {	
-            var libraryScript = document.getElementById('zeresLibraryScript');
+            var libraryScript = document.getElementById('zackLibraryScript');
             if (libraryScript) libraryScript.parentElement.removeChild(libraryScript);
             libraryScript = document.createElement("script");
             libraryScript.setAttribute("type", "text/javascript");
             libraryScript.setAttribute("src", "https://rauenzi.github.io/BDPluginLibrary/release/ZLibrary.js");
-            libraryScript.setAttribute("id", "zLibraryScript");
+            libraryScript.setAttribute("id", "zackLibraryScript");
             document.head.appendChild(libraryScript);
             if (typeof window.ZeresLibrary !== "undefined") this.initialize();
             else libraryScript.addEventListener("load", () => { this.initialize(); });
@@ -323,6 +307,22 @@ var VIPs = function() {
                     }
                 }
             }
+        }
+
+        generateSettings(panel) {
+            ZLibrary.PluginUtilities.loadSettings(this.getName(), this.defaultSettings);
+            new ZLibrary.Settings.SettingGroup("VIP Settings", {callback: () => {ZLibrary.PluginUtilities.saveSettings(this.getName(), this.settings);}, shown: true}).appendTo(panel).append(
+                new ZLibrary.Settings.Switch("Pin VIPs to DMs", "", this.settings.VIPPinDMs, (checked) => {this.settings.VIPPinDMs = checked;}),
+                new ZLibrary.Settings.Switch("Include Group DMs", "", this.settings.GroupDMs, (checked) => {this.settings.GroupDMs = checked;})
+            );
+        }
+
+        getSettingsPanel() {
+            var panel = document.createElement("form")
+            panel.setAttribute("class", "form");
+            panel.setAttribute("width", "100%");
+            if (this.initialized) this.generateSettings(panel);
+		    return panel;
         }
 
         stop() {
