@@ -10,7 +10,7 @@ var VIPs = function() {
     return class VIPs {
         getName() { return "VIPs"; }
         getDescription() { return "Adds an extra section to the friends list where you can add your most important contacts on Discord (Bots included). Add users by right clicking their name, opening their profile and then clicking on the star."; }
-        getVersion() { return "1.4.9"; }
+        getVersion() { return "1.4.10"; }
         getAuthor() { return "Green"; }
         getUpdateLink() { return "https://raw.githubusercontent.com/Greentwilight/VIPs/master/VIPs.plugin.js"; }
         load() {}
@@ -34,12 +34,14 @@ var VIPs = function() {
 
 
         initialize() {
+
             let self = this, VIPIndex = -1, DMIndex = -1, ids = [];
             self.initialized = true;           
             ZLibrary.PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), this.getUpdateLink());
             const Friends = ZLibrary.WebpackModules.findByDisplayName("Friends");
             const DirectMessages = ZLibrary.WebpackModules.findByDisplayName("LazyScroller");
 
+            //Render Before DM's
             ZLibrary.Patcher.before(this.getName(), DirectMessages.prototype, "render", function(thisObject, args, returnValue){
                 ZLibrary.PluginUtilities.loadSettings(self.getName(), self.defaultSettings);
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
@@ -84,7 +86,7 @@ var VIPs = function() {
                 }
             });
 
-
+            //Render After Friends
             ZLibrary.Patcher.after(this.getName(), Friends.prototype, "render", function(thisObject, args, returnValue) {
                 let user, ids = [];
                 if(ZLibrary.PluginUtilities.loadData("VIPs", "VIPs", "").ids){
@@ -134,7 +136,7 @@ var VIPs = function() {
                 
                 let sections = returnValue.props.children[0].props.children.props.children, VIPs = [];
                 sections.push(sections[sections.length-2]);
-                sections.push(ZLibrary.DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP"}));
+                sections.push(ZLibrary.DiscordModules.React.cloneElement(sections[sections.length-2], {"children": "VIP", "id": "VIP"}));
                 sections[sections.length-1].key = "VIP";
    
                 for (var rowCounter = 0; rowCounter < thisObject.state.rows._rows.length; rowCounter++){
@@ -169,6 +171,7 @@ var VIPs = function() {
                 }
             });
 
+            //Update instead of Friends
             ZLibrary.Patcher.instead(this.getName(), Friends.prototype, "componentDidUpdate", function(thisObject) {
                 let vipRowNumber = 0, ids = [];
                 if(thisObject.state.section == "VIP"){
